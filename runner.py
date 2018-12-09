@@ -11,10 +11,9 @@ Game = namedtuple('Game', 'dayCount date team1 homefield1 score1 team2 homefield
 Team = namedtuple('Team', 'index name rating')
 
 def build_matrices(count):
+    count += 1 # expand to track HCA
     M = np.zeros((count, count), int)
     N = np.zeros(count, int)
-    M = np.vstack((M, [1] * count))
-    N = np.append(N, 0)
     return M, N
 
 def build_teams(fname):
@@ -30,13 +29,17 @@ def update_ratings(M, N, rows):
     for row in rows:
         row = map(int, row)
         game = Game._make(row)
+        neutral = (game.homefield1 == game.homefield2 == 0)
 
-        if game.homefield1 in (0, 1):
+        if neutral:
+            continue
+
+        if game.homefield1 == 1:
             home_idx = game.team1 - 1
             home_pts = game.score1
             away_idx = game.team2 - 1
             away_pts = game.score2
-        else:
+        elif game.homefield2 == 1:
             home_idx = game.team2 - 1
             home_pts = game.score2
             away_idx = game.team1 - 1
@@ -50,6 +53,13 @@ def update_ratings(M, N, rows):
 
         N[home_idx] += (home_pts - away_pts)
         N[away_idx] += (away_pts - home_pts)
+
+        M[home_idx, -1] += 1
+        M[-1, home_idx] += 1
+        M[away_idx, -1] -= 1
+        M[-1, away_idx] -= 1
+        M[-1, -1] += 1
+        N[-1] += (home_pts - away_pts)
 
     return M, N
 
@@ -67,6 +77,7 @@ def main():
 
     import pprint
     pprint.pprint(team_ratings)
+    print 'HCA:', round(ratings[-1], 2)
 
 if __name__ == '__main__':
     main()
