@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
 import csv
+import pprint
+import sqlite3
 import numpy as np
+from itertools import groupby
 from operator import attrgetter
 from collections import namedtuple
 
@@ -20,13 +23,11 @@ def solve(M, N):
     rv = np.linalg.lstsq(M, N, rcond=0)
     return rv[0]
 
-def update_ratings(M, N, rows):
-    for row in rows:
-        row = map(int, row)
-        game = Game._make(row)
+def update_ratings(M, N, games):
+    for game in games:
         neutral = (game.homefield1 == game.homefield2 == 0)
 
-        if game.homefield1 == 1:
+        if game.homefield1 == 1 or game.homefield1 == 0:
             home_idx = game.team1 - 1
             home_pts = game.score1
             away_idx = game.team2 - 1
@@ -57,20 +58,34 @@ def update_ratings(M, N, rows):
     return M, N
 
 def build_teams(fname):
-    teams = [name.strip() for (idx, name) in csv.reader(open('teams.csv'))]
+    teams = [name.strip() for (_, name) in csv.reader(open('teams.csv'))]
     assert len(teams) == TEAM_COUNT, 'incorrect number of teams'
     return teams
 
+def build_games(fname):
+    raw_results = csv.reader(open(fname))
+    return map(Game._make, [map(int, row) for row in raw_results])
+
+def combine(teams, ratings):
+    return map(Team._make, [(team, round(rating, 2)) for (team, rating) in zip(teams, ratings)])
+
 def main():
+    conn = sqlite3.connect('ratings.db')
     teams = build_teams('teams.csv')
-
-    results = csv.reader(open('results.csv'))
+    game_results = build_games('results.csv')
+    daily_games = groupby(game_results, key=attrgetter('date'))
     M, N = build_matrices(TEAM_COUNT)
-    M, N = update_ratings(M, N, results)
-    ratings = solve(M, N)
 
-    team_ratings = map(Team._make, [(team, round(rating, 2)) for (team, rating) in zip(teams, ratings)])
-    team_ratings = sorted(team_ratings, key=attrgetter('rating'), reverse=True)
+    for date, games in daily_games:
+        print 'Date: %s' % date
+        M, N = update_ratings(M, N, games)
+        ratings = solve(M, N)
+        team_ratings = combine(teams, ratings)
+        values = [(date, team.name, team.rating) for team in team_ratings]
+        conn.executemany("insert into ratings (date, team, rating) values (?, ?, ?)", values)
+
+    conn.commit()
+    conn.close()
 
 if __name__ == '__main__':
     main()
