@@ -58,7 +58,7 @@ def update_ratings(M, N, games):
     return M, N
 
 def build_teams(fname):
-    teams = [name.strip() for (_, name) in csv.reader(open('teams.csv'))]
+    teams = [name.strip() for (_, name) in csv.reader(open(fname))]
     assert len(teams) == TEAM_COUNT, 'incorrect number of teams'
     return teams
 
