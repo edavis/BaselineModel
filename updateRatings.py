@@ -27,7 +27,7 @@ def update_ratings(M, N, games):
     for game in games:
         neutral = (game.homefield1 == game.homefield2 == 0)
 
-        if game.homefield1 == 1 or game.homefield1 == 0:
+        if game.homefield1 in (0, 1): # 0 = neutral, so just pick this one
             home_idx = game.team1 - 1
             home_pts = game.score1
             away_idx = game.team2 - 1
