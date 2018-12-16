@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # clear out ratings.db
-sqlite3 ratings.db <<<'delete from ratings'
-sqlite3 ratings.db <<<'delete from stats'
+sqlite3 ratings.db 'delete from ratings'
+sqlite3 ratings.db 'delete from stats'
 
 # download latest games
 rm -f results.csv && make results.csv
