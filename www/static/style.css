@@ -4,19 +4,17 @@ body {
   font: 18px 'Linux Libertine', sans-serif;
   background: oldlace;
   color: #333;
-  width: 400px;
-  margin: 0 auto 50px;
+  margin: 50px;
   counter-reset: rank;
 }
-h1 {
-  text-align: center;
-}
+
 p {
   text-align: justify;
 }
+
 table {
   border-collapse: collapse;
-  width: 100%;
+  width: 350px;
   font-size: 20px;
 }
 tr:last-child td {
@@ -26,10 +24,12 @@ td {
   border-bottom: 1px solid #bbb;
   padding: 5px 0;
 }
+
 .rating {
   text-align: right;
   font-size: 18px;
 }
+
 .rank::before {
   counter-increment: rank;
   content: counter(rank);
