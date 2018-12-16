@@ -16,10 +16,13 @@ table {
   border-collapse: collapse;
   width: 350px;
   font-size: 20px;
+  margin-top: 30px;
 }
+
 tr:last-child td {
   border-bottom: 0;
 }
+
 td {
   border-bottom: 1px solid #bbb;
   padding: 5px 0;
@@ -34,6 +37,7 @@ td {
   counter-increment: rank;
   content: counter(rank);
 }
+
 .rank {
   text-align: center;
   font-size: 13px;
