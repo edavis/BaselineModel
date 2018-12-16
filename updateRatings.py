@@ -75,14 +75,19 @@ def main():
     game_results = build_games('results.csv')
     daily_games = groupby(game_results, key=attrgetter('date'))
     M, N = build_matrices(TEAM_COUNT)
+    game_count = 0
 
     for date, games in daily_games:
-        print 'Date: %s' % date
+        games = list(games)
         M, N = update_ratings(M, N, games)
         ratings = solve(M, N)
         team_ratings = combine(teams, ratings)
         values = [(date, team.name, team.rating) for team in team_ratings]
         conn.executemany("insert into ratings (date, team, rating) values (?, ?, ?)", values)
+
+        game_count += len(games)
+        hca = ratings[-1]
+        conn.execute('insert into stats (date, game_count, hca) values (?, ?, ?)', (date, game_count, hca))
 
     conn.commit()
     conn.close()
