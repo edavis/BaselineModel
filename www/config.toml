@@ -1,0 +1,9 @@
+baseURL = "http://example.org/"
+languageCode = "en-us"
+title = "My New Hugo Site"
+uglyURLs = true
+[permalinks]
+  ratings = "/:year/:month/:day/ratings"
+[taxonomies]
+  tag = ""
+  category = ""

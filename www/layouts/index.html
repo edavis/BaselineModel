@@ -1,0 +1,6 @@
+{{ define "main" }}
+{{ range first 1 .Pages }}
+{{ partial "stats.html" . }}
+{{ .Content }}
+{{ end }}
+{{ end }}
