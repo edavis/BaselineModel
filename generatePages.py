@@ -16,7 +16,7 @@ def main():
 
         page = open('www/content/ratings/ratings-%s.md' % date, 'w')
         page.write('---\n')
-        page.write('title: Ratings update for %s\n' % date)
+        page.write('title: Daily Ratings Update\n')
         page.write('date: %s-%s-%s\n' % (date[:4], date[4:6], date[6:]))
         page.write('GameCount: %d\n' % game_count)
         page.write('HCA: %.2f\n' % hca)
