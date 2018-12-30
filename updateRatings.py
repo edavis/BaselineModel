@@ -57,6 +57,26 @@ def update_ratings(M, N, games):
 
     return M, N
 
+def build_predictions(date, lookup, ratings, games):
+    rv = []
+
+    for game in games:
+        if game.homefield1 in (0, 1): # 0 = neutral, so just pick this one
+            home_idx = game.team1 - 1
+            home_pts = game.score1
+            away_idx = game.team2 - 1
+            away_pts = game.score2
+        elif game.homefield2 == 1:
+            home_idx = game.team2 - 1
+            home_pts = game.score2
+            away_idx = game.team1 - 1
+            away_pts = game.score1
+
+        hmov = ratings[home_idx] - ratings[away_idx]
+        rv.append((date, lookup[away_idx], away_pts, lookup[home_idx], home_pts, hmov))
+
+    return rv
+
 def build_teams(fname):
     teams = [name.strip() for (_, name) in csv.reader(open(fname))]
     assert len(teams) == TEAM_COUNT, 'incorrect number of teams'
@@ -76,9 +96,18 @@ def main():
     daily_games = groupby(game_results, key=attrgetter('date'))
     M, N = build_matrices(TEAM_COUNT)
     game_count = 0
+    ratings = None
+
+    # map each team idx (0 - 352) to a team name
+    teams_lookup = dict(zip(xrange(TEAM_COUNT), teams))
 
     for date, games in daily_games:
         games = list(games)
+
+        if ratings is not None: # TODO(ejd): only after a min number of games(?) and add HCA
+            values = build_predictions(date, teams_lookup, ratings, games)
+            conn.executemany('insert into predictions (date, away, ascore, home, hscore, hmov) values (?, ?, ?, ?, ?, ?)', values)
+
         M, N = update_ratings(M, N, games)
         ratings = solve(M, N)
         team_ratings = combine(teams, ratings)

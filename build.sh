@@ -2,6 +2,7 @@
 
 # clear out ratings.db
 sqlite3 ratings.db 'delete from ratings'
+sqlite3 ratings.db 'delete from predictions'
 sqlite3 ratings.db 'delete from stats'
 
 # download latest games

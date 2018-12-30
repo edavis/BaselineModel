@@ -1,7 +1,7 @@
 all: results.csv teams.csv ratings.db
 
 results.csv:
-	wget -O $@ "https://www.masseyratings.com/scores.php?s=305972&sub=11590&all=1&mode=3&format=1"
+	wget -O $@ "https://www.masseyratings.com/scores.php?s=305972&sub=11590&all=1&mode=3&format=1&sch=on"
 
 teams.csv:
 	wget -O $@ "https://www.masseyratings.com/scores.php?s=305972&sub=11590&all=1&mode=3&format=2"
