@@ -82,17 +82,17 @@ def build_teams(fname):
     assert len(teams) == TEAM_COUNT, 'incorrect number of teams'
     return teams
 
-def build_games(fname):
+def parse_results(fname):
     raw_results = csv.reader(open(fname))
     return map(Game._make, [map(int, row) for row in raw_results])
 
-def combine(teams, ratings):
+def build_team_ratings(teams, ratings):
     return map(Team._make, [(team, round(rating, 2)) for (team, rating) in zip(teams, ratings)])
 
 def main():
     conn = sqlite3.connect('ratings.db')
     teams = build_teams('teams.csv')
-    game_results = build_games('results.csv')
+    game_results = parse_results('results.csv')
     daily_games = groupby(game_results, key=attrgetter('date'))
     M, N = build_matrices(TEAM_COUNT)
     game_count = 0
@@ -110,7 +110,7 @@ def main():
 
         M, N = update_ratings(M, N, games)
         ratings = solve(M, N)
-        team_ratings = combine(teams, ratings)
+        team_ratings = build_team_ratings(teams, ratings)
         values = [(date, team.name, team.rating) for team in team_ratings]
         conn.executemany("insert into ratings (date, team, rating) values (?, ?, ?)", values)
 
