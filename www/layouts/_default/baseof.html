@@ -2,17 +2,12 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>College Basketball Ratings</title>
+<title>{{ block "title" . }}{{ end }}</title>
 <link rel="stylesheet" type="text/css" href="/style.css">
 </head>
 <body>
-{{ block "intro" . }}
-{{ block "title" . }}
-<h1>College Basketball Ratings</h1>
-{{ end }}
-<p>Subtract the ratings of two teams to arrive at a predicted margin of victory.
-<p>Add the home-court advantage (below) to the home team's rating if the game is not on a neutral court.
-{{ end }}
+{{ block "header" . }}{{ end }}
+{{ block "intro" . }}{{ end }}
 {{ block "main" . }}{{ end }}
 <p>Last Generated: {{ now.Format "Jan 02, 2006 at 03:04 PM MST" }}</p>
 </body>

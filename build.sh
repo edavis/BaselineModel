@@ -15,4 +15,4 @@ python updateRatings.py
 python generatePages.py
 
 # rebuild the site
-( cd www/ && rm -rf public/* && hugo )
+( cd www/ && rm -rf public/* && hugo --buildFuture )

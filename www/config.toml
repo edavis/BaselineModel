@@ -4,6 +4,7 @@ title = "My New Hugo Site"
 uglyURLs = true
 [permalinks]
   ratings = "/:year/:month/:day/ratings"
+  predictions = "/:year/:month/:day/predictions"
 [taxonomies]
   tag = ""
   category = ""

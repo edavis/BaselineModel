@@ -2,7 +2,6 @@
 
 body {
   font: 18px 'Linux Libertine', sans-serif;
-  background: oldlace;
   color: #333;
   margin: 50px;
   counter-reset: rank;
@@ -17,6 +16,18 @@ table {
   width: 350px;
   font-size: 20px;
   margin-top: 30px;
+}
+
+.predictions {
+  width: 700px;
+}
+
+.predictions th, td {
+  text-align: left;
+}
+
+.predictions .prediction {
+  text-align: right;
 }
 
 tr:last-child td {

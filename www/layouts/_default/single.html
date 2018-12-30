@@ -1,8 +1,0 @@
-{{ define "title" }}
-<h1>Daily Ratings Update for {{ .PubDate.Format "Jan 02, 2006" }}</h1>
-{{ end }}
-
-{{ define "main" }}
-{{ partial "stats.html" . }}
-{{ .Content }}
-{{ end }}
