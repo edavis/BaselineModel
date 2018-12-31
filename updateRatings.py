@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import csv
-import pprint
 import sqlite3
 import numpy as np
 from itertools import groupby
