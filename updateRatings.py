@@ -116,7 +116,7 @@ def main():
     for date, games in daily_games:
         games = list(games)
 
-        if ratings is not None and hca is not None:
+        if ratings is not None and game_count >= 1000:
             values = build_predictions(date, teams_lookup, ratings, hca, games)
             conn.executemany('insert into predictions (date, away, ascore, home, hscore, hmov_pred) values (?, ?, ?, ?, ?, ?)', values)
 
