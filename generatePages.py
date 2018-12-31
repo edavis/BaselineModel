@@ -12,7 +12,7 @@ def main():
     cursor = conn.cursor()
 
     ratings = cursor.execute('select date, team, rating from ratings order by date asc')
-    daily_ratings = groupby(ratings, key=itemgetter(0))
+    daily_ratings = groupby(ratings.fetchall(), key=itemgetter(0))
 
     for date, ratings in daily_ratings:
         cursor.execute('select game_count, hca from stats where date = ?', (date,))
@@ -36,7 +36,7 @@ def main():
         page.close()
 
     predictions = cursor.execute('select date, away, ascore, home, hscore, hmov from predictions order by date asc')
-    daily_predictions = groupby(predictions, key=itemgetter(0))
+    daily_predictions = groupby(predictions.fetchall(), key=itemgetter(0))
 
     for date, predictions in daily_predictions:
         page = open('www/content/predictions/predictions-%s.md' % date, 'w')
