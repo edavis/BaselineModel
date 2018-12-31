@@ -5,7 +5,7 @@ from itertools import groupby
 from operator import itemgetter
 from collections import namedtuple
 
-Row = namedtuple('Row', 'date away ascore home hscore hmov')
+Row = namedtuple('Row', 'date away ascore home hscore hmov_actual hmov_pred error')
 
 def main():
     conn = sqlite3.connect('ratings.db')
@@ -35,7 +35,7 @@ def main():
         page.write('</table>\n')
         page.close()
 
-    predictions = cursor.execute('select date, away, ascore, home, hscore, hmov from predictions order by date asc, home asc')
+    predictions = cursor.execute('select date, away, ascore, home, hscore, (hscore-ascore) as hmov_actual, hmov_pred, (hmov_pred)-(hscore-ascore) as error from predictions order by date asc, home asc')
     daily_predictions = groupby(predictions.fetchall(), key=itemgetter(0))
 
     for date, predictions in daily_predictions:
@@ -46,15 +46,17 @@ def main():
         page.write('---\n\n')
 
         page.write('<table class=predictions>')
-        page.write('<tr><th colspan=2>Away</th> <th colspan=2>Home</th> <th class=prediction>Prediction</th></tr>\n')
+        page.write('<tr><th colspan=2>Away</th> <th colspan=2>Home</th> <th class=numeric>MOV</th> <th class=numeric>Prediction</th> <th class=numeric>Error</th></tr>\n')
         for prediction in predictions:
             row = Row._make(prediction)
             page.write('<tr>')
-            page.write('<td>%s</td>' % row.away.replace('_', ' '))
-            page.write('<td>%d</td>' % row.ascore)
-            page.write('<td>%s</td>' % row.home.replace('_', ' '))
-            page.write('<td>%d</td>' % row.hscore)
-            page.write('<td class=prediction>%.2f</td>' % row.hmov)
+            page.write('<td class=team>%s</td>' % row.away.replace('_', ' '))
+            page.write('<td class=score>%d</td>' % row.ascore)
+            page.write('<td class=team>%s</td>' % row.home.replace('_', ' '))
+            page.write('<td class=score>%d</td>' % row.hscore)
+            page.write('<td class=numeric>%d</td>' % row.hmov_actual)
+            page.write('<td class=numeric>%.2f</td>' % row.hmov_pred)
+            page.write('<td class=numeric>%.2f</td>' % row.error)
             page.write('</tr>\n')
         page.write('</table>')
 

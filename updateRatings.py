@@ -61,7 +61,7 @@ def update_ratings(M, N, games):
 
     return M, N
 
-def build_predictions(date, lookup, ratings, games):
+def build_predictions(date, lookup, ratings, hca, games):
     rv = []
 
     for game in games:
@@ -76,8 +76,14 @@ def build_predictions(date, lookup, ratings, games):
             away_idx = game.team1 - 1
             away_pts = game.score1
 
-        hmov = ratings[home_idx] - ratings[away_idx]
-        rv.append((date, lookup[away_idx], away_pts, lookup[home_idx], home_pts, hmov))
+        neutral = (game.homefield1 == game.homefield2 == 0)
+
+        if not neutral:
+            hmov_pred = (ratings[home_idx] + hca) - ratings[away_idx]
+        else:
+            hmov_pred = ratings[home_idx] - ratings[away_idx]
+
+        rv.append((date, lookup[away_idx], away_pts, lookup[home_idx], home_pts, hmov_pred))
 
     return rv
 
@@ -100,7 +106,9 @@ def main():
     daily_games = groupby(game_results, key=attrgetter('date'))
     M, N = build_matrices(TEAM_COUNT)
     game_count = 0
+
     ratings = None
+    hca = None
 
     # map each team idx (0 - 352) to a team name
     teams_lookup = dict(zip(xrange(TEAM_COUNT), teams))
@@ -108,9 +116,9 @@ def main():
     for date, games in daily_games:
         games = list(games)
 
-        if ratings is not None: # TODO(ejd): only after a min number of games(?) and add HCA
-            values = build_predictions(date, teams_lookup, ratings, games)
-            conn.executemany('insert into predictions (date, away, ascore, home, hscore, hmov) values (?, ?, ?, ?, ?, ?)', values)
+        if ratings is not None and hca is not None:
+            values = build_predictions(date, teams_lookup, ratings, hca, games)
+            conn.executemany('insert into predictions (date, away, ascore, home, hscore, hmov_pred) values (?, ?, ?, ?, ?, ?)', values)
 
         M, N = update_ratings(M, N, games)
         ratings = solve(M, N)
