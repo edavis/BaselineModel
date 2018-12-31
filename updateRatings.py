@@ -12,9 +12,6 @@ TEAM_COUNT = 353
 Game = namedtuple('Game', 'dayCount date team1 homefield1 score1 team2 homefield2 score2')
 Team = namedtuple('Team', 'name rating')
 
-class FutureGame(Exception):
-    "Raise if game has not been played yet."
-
 def build_matrices(count):
     count += 1 # expand to track HCA
     M = np.zeros((count, count), int)
@@ -26,6 +23,11 @@ def solve(M, N):
     return rv[0]
 
 def update_ratings(M, N, games):
+    # quick bail if the day's slate hasn't happened yet
+    future_games = all([g.score1 == g.score2 == 0 for g in games])
+    if future_games:
+        return M, N
+
     for game in games:
         neutral = (game.homefield1 == game.homefield2 == 0)
 
@@ -39,9 +41,6 @@ def update_ratings(M, N, games):
             home_pts = game.score2
             away_idx = game.team1 - 1
             away_pts = game.score1
-
-        if home_pts == 0 and away_pts == 0:
-            raise FutureGame
 
         M[home_idx, home_idx] += 1
         M[away_idx, away_idx] += 1
@@ -113,11 +112,7 @@ def main():
             values = build_predictions(date, teams_lookup, ratings, games)
             conn.executemany('insert into predictions (date, away, ascore, home, hscore, hmov) values (?, ?, ?, ?, ?, ?)', values)
 
-        try:
-            M, N = update_ratings(M, N, games)
-        except FutureGame:
-            continue
-
+        M, N = update_ratings(M, N, games)
         ratings = solve(M, N)
         team_ratings = build_team_ratings(teams, ratings)
         values = [(date, team.name, team.rating) for team in team_ratings]
