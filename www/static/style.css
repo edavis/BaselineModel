@@ -22,7 +22,7 @@ table {
   width: 700px;
 }
 
-.predictions th, td {
+.predictions th, .predictions td {
   text-align: left;
 }
 
