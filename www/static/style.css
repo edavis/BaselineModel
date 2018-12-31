@@ -19,15 +19,24 @@ table {
 }
 
 .predictions {
-  width: 700px;
+  width: 100%;
 }
 
-.predictions th, .predictions td {
+.predictions th {
   text-align: left;
 }
 
-.predictions .prediction {
+.predictions .team {
+  width: 25%;
+}
+
+.predictions .score {
+  width: 5%;
+}
+
+.predictions .numeric {
   text-align: right;
+  width: 10%;
 }
 
 tr:last-child td {
