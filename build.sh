@@ -11,8 +11,12 @@ rm -f results.csv && make results.csv
 # add ratings to ratings.db
 python updateRatings.py
 
+# clean slate
+( cd www/ && mkdir -p content/ratings/ content/predictions/ )
+( cd www/ && rm -rf content/ratings/* content/predictions/* public/* )
+
 # generate a new ratings post for each day in the database
 python generatePages.py
 
 # rebuild the site
-( cd www/ && rm -rf public/* && hugo --buildFuture )
+( cd www/ && hugo --buildFuture )
