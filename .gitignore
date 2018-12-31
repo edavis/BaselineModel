@@ -1,4 +1,5 @@
-results.csv
+results*.csv
+teams*.csv
 ratings.db
 www/public/
 www/content/

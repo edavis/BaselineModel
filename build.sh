@@ -1,21 +1,23 @@
 #!/usr/bin/env bash
 
 # clear out ratings.db
-sqlite3 ratings.db 'delete from ratings'
-sqlite3 ratings.db 'delete from predictions'
-sqlite3 ratings.db 'delete from stats'
+rm -f ratings.db
+sqlite3 ratings.db < init.sql
 
-# download latest games
-rm -f results.csv && make results.csv
+# re-download results of latest season only
+rm -f results2019.csv && make results2019.csv
+
+# make sure everything else has been built (previous seasons, teams, etc)
+make
 
 # add ratings to ratings.db
 python updateRatings.py
 
-# clean slate
+# clear out content
 ( cd www/ && mkdir -p content/ratings/ content/predictions/ )
 ( cd www/ && rm -rf content/ratings/* content/predictions/* public/* )
 
-# generate a new ratings post for each day in the database
+# generate a new ratings/predictions post for each day in the database
 python generatePages.py
 
 # rebuild the site

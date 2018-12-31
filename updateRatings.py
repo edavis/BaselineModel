@@ -7,8 +7,6 @@ from itertools import groupby
 from operator import attrgetter
 from collections import namedtuple
 
-TEAM_COUNT = 353
-
 Game = namedtuple('Game', 'dayCount date team1 homefield1 score1 team2 homefield2 score2')
 Team = namedtuple('Team', 'name rating')
 
@@ -89,7 +87,6 @@ def build_predictions(date, lookup, ratings, hca, games):
 
 def build_teams(fname):
     teams = [name.strip() for (_, name) in csv.reader(open(fname))]
-    assert len(teams) == TEAM_COUNT, 'incorrect number of teams'
     return teams
 
 def parse_results(fname):
@@ -99,19 +96,20 @@ def parse_results(fname):
 def build_team_ratings(teams, ratings):
     return map(Team._make, [(team, round(rating, 2)) for (team, rating) in zip(teams, ratings)])
 
-def main():
+def main(results_fname, teams_fname, team_count):
     conn = sqlite3.connect('ratings.db')
-    teams = build_teams('teams.csv')
-    game_results = parse_results('results.csv')
+    teams = build_teams(teams_fname)
+    assert len(teams) == team_count, 'incorrect number of teams'
+    game_results = parse_results(results_fname)
     daily_games = groupby(game_results, key=attrgetter('date'))
-    M, N = build_matrices(TEAM_COUNT)
+    M, N = build_matrices(team_count)
     game_count = 0
 
     ratings = None
     hca = None
 
-    # map each team idx (0 - 352) to a team name
-    teams_lookup = dict(zip(xrange(TEAM_COUNT), teams))
+    # map each team idx to a team name
+    teams_lookup = dict(zip(xrange(team_count), teams))
 
     for date, games in daily_games:
         games = list(games)
@@ -134,4 +132,6 @@ def main():
     conn.close()
 
 if __name__ == '__main__':
-    main()
+    main('results2017.csv', 'teams2017.csv', 351)
+    main('results2018.csv', 'teams2018.csv', 351)
+    main('results2019.csv', 'teams2019.csv', 353)
