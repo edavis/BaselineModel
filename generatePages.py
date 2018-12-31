@@ -35,7 +35,7 @@ def main():
         page.write('</table>\n')
         page.close()
 
-    predictions = cursor.execute('select date, away, ascore, home, hscore, hmov from predictions order by date asc')
+    predictions = cursor.execute('select date, away, ascore, home, hscore, hmov from predictions order by date asc, home asc')
     daily_predictions = groupby(predictions.fetchall(), key=itemgetter(0))
 
     for date, predictions in daily_predictions:
