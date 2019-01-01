@@ -56,7 +56,8 @@ def main(results_fname):
     for date, predictions in daily_predictions:
         # calculate error metrics if games have occured
         rows = map(Row._make, predictions)
-        if sum([int(row.hscore) + int(row.ascore) for row in rows]) > 0:
+        have_played = sum([int(row.hscore) + int(row.ascore) for row in rows]) > 0
+        if have_played:
             today_errors = [float(row.error) for row in rows]
             total_errors.extend(today_errors)
 
@@ -70,20 +71,34 @@ def main(results_fname):
         page.write('total_mae: %.2f\n' % calc_mae(total_errors))
         page.write('total_mse: %.2f\n' % calc_mse(total_errors))
         page.write('total_rmse: %.2f\n' % calc_rmse(total_errors))
+        page.write('have_played: %d\n' % have_played)
         page.write('---\n\n')
 
         page.write('<table class=predictions>')
-        page.write('<tr><th colspan=2>Away</th> <th colspan=2>Home</th> <th class=numeric>MOV</th> <th class=numeric>Prediction</th> <th class=numeric>Error</th></tr>\n')
+        if have_played:
+            page.write('<tr><th colspan=2>Away</th> <th colspan=2>Home</th> <th class=numeric>MOV</th> <th class=numeric>Prediction</th> <th class=numeric>Error</th></tr>\n')
+        else:
+            page.write('<tr><th>Away</th> <th>Home</th> <th class=numeric>Prediction</th></tr>\n')
         for row in rows:
-            page.write('<tr>')
-            page.write('<td class=team>%s</td>' % row.away.replace('_', ' '))
-            page.write('<td class=score>%d</td>' % row.ascore)
-            page.write('<td class=team>%s</td>' % row.home.replace('_', ' '))
-            page.write('<td class=score>%d</td>' % row.hscore)
-            page.write('<td class=numeric>%d</td>' % row.hmov_actual)
-            page.write('<td class=numeric>%.2f</td>' % row.hmov_pred)
-            page.write('<td class=numeric>%.2f</td>' % row.error)
-            page.write('</tr>\n')
+            away = row.away.replace('_', ' ')
+            home = row.home.replace('_', ' ')
+
+            if have_played:
+                page.write('<tr>')
+                page.write('<td class=team>%s</td>' % away)
+                page.write('<td class=score>%d</td>' % row.ascore)
+                page.write('<td class=team>%s</td>' % home)
+                page.write('<td class=score>%d</td>' % row.hscore)
+                page.write('<td class=numeric>%d</td>' % row.hmov_actual)
+                page.write('<td class=numeric>%.2f</td>' % row.hmov_pred)
+                page.write('<td class=numeric>%.2f</td>' % row.error)
+                page.write('</tr>\n')
+            else:
+                page.write('<tr>')
+                page.write('<td class=team>%s</td>' % away)
+                page.write('<td class=team>%s</td>' % home)
+                page.write('<td class=numeric>%.2f</td>' % row.hmov_pred)
+                page.write('</tr>\n')
         page.write('</table>')
 
         page.close()
