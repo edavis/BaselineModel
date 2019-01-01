@@ -21,11 +21,11 @@ def calc_mse(errors):
 def calc_rmse(errors):
     return math.sqrt(calc_mse(errors))
 
-def main():
+def main(results_fname):
     conn = sqlite3.connect('ratings.db')
     cursor = conn.cursor()
 
-    ratings = cursor.execute('select date, team, rating from ratings order by date asc')
+    ratings = cursor.execute('select date, team, rating from ratings where results = ? order by date asc', (results_fname,))
     daily_ratings = groupby(ratings.fetchall(), key=itemgetter(0))
 
     for date, ratings in daily_ratings:
@@ -50,7 +50,7 @@ def main():
         page.close()
 
     total_errors = []
-    predictions = cursor.execute('select date, away, ascore, home, hscore, (hscore-ascore) as hmov_actual, hmov_pred, (hmov_pred)-(hscore-ascore) as error from predictions order by date asc, home asc')
+    predictions = cursor.execute('select date, away, ascore, home, hscore, (hscore-ascore) as hmov_actual, hmov_pred, error from predictions where results = ? order by date asc, home asc', (results_fname,))
     daily_predictions = groupby(predictions.fetchall(), key=itemgetter(0))
 
     for date, predictions in daily_predictions:
@@ -89,4 +89,6 @@ def main():
         page.close()
 
 if __name__ == '__main__':
-    main()
+    main('results2017.csv')
+    main('results2018.csv')
+    main('results2019.csv')

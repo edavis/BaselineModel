@@ -59,9 +59,7 @@ def update_ratings(M, N, games):
 
     return M, N
 
-def build_predictions(date, lookup, ratings, hca, games):
-    rv = []
-
+def build_predictions(lookup, ratings, hca, games):
     for game in games:
         if game.homefield1 in (0, 1): # 0 = neutral, so just pick this one
             home_idx = game.team1 - 1
@@ -81,9 +79,9 @@ def build_predictions(date, lookup, ratings, hca, games):
         else:
             hmov_pred = ratings[home_idx] - ratings[away_idx]
 
-        rv.append((date, lookup[away_idx], away_pts, lookup[home_idx], home_pts, hmov_pred))
+        error = hmov_pred - (home_pts - away_pts)
 
-    return rv
+        yield (lookup[away_idx], away_pts, lookup[home_idx], home_pts, hmov_pred, error)
 
 def build_teams(fname):
     teams = [name.strip() for (_, name) in csv.reader(open(fname))]
@@ -115,14 +113,15 @@ def main(results_fname, teams_fname, team_count):
         games = list(games)
 
         if ratings is not None and game_count >= 1000:
-            values = build_predictions(date, teams_lookup, ratings, hca, games)
-            conn.executemany('insert into predictions (date, away, ascore, home, hscore, hmov_pred) values (?, ?, ?, ?, ?, ?)', values)
+            preds = build_predictions(teams_lookup, ratings, hca, games)
+            values = [(results_fname, date, away, ascore, home, hscore, hmov_pred, error) for (away, ascore, home, hscore, hmov_pred, error) in preds]
+            conn.executemany('insert into predictions (results, date, away, ascore, home, hscore, hmov_pred, error) values (?, ?, ?, ?, ?, ?, ?, ?)', values)
 
         M, N = update_ratings(M, N, games)
         ratings = solve(M, N)
         team_ratings = build_team_ratings(teams, ratings)
-        values = [(date, team.name, team.rating) for team in team_ratings]
-        conn.executemany("insert into ratings (date, team, rating) values (?, ?, ?)", values)
+        values = [(results_fname, date, team.name, team.rating) for team in team_ratings]
+        conn.executemany('insert into ratings (results, date, team, rating) values (?, ?, ?, ?)', values)
 
         game_count += len(games)
         hca = ratings[-1]
