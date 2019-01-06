@@ -39,8 +39,18 @@ def update_ratings(M, N, games):
         M[home_idx, away_idx] -= 1
         M[away_idx, home_idx] -= 1
 
-        N[home_idx] += (home_pts - away_pts)
-        N[away_idx] += (away_pts - home_pts)
+        mov = home_pts - away_pts
+
+        # Halve the excess beyond the mpd when calculating the mov
+        mpd = 14
+        if mov > 0 and abs(mov) > mpd:
+            mov = mpd + (mov - mpd) / 2.0
+        elif mov < 0 and abs(mov) > mpd:
+            mov = -mpd - (abs(mov) - mpd) / 2.0
+
+        mov = int(round(mov, 0))
+        N[home_idx] += mov
+        N[away_idx] += -mov
 
         neutral = (game.homefield1 == game.homefield2 == 0)
         if not neutral:
@@ -49,7 +59,7 @@ def update_ratings(M, N, games):
             M[away_idx, -1] -= 1
             M[-1, away_idx] -= 1
             M[-1, -1] += 1
-            N[-1] += (home_pts - away_pts)
+            N[-1] += mov
 
     return M, N
 
@@ -125,7 +135,7 @@ def main(results_fname, teams_fname, team_count):
             conn.executemany('insert into ratings (results, date, team, rating) values (?, ?, ?, ?)', values)
 
             game_count += len(games)
-            hca = ratings[-1]
+            hca = max(3.5, ratings[-1])
             conn.execute('insert into stats (date, game_count, hca) values (?, ?, ?)', (date, game_count, hca))
 
     conn.commit()
