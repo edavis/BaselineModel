@@ -1,65 +1,64 @@
-@import url(https://brick.freetls.fastly.net/Linux+Libertine:400);
+@import url(//brick.freetls.fastly.net/Anonymous+Pro:400,700);
 
 body {
-  font: 18px 'Linux Libertine', sans-serif;
   color: #333;
-  margin: 50px;
-  counter-reset: rank;
-}
-
-p {
-  text-align: justify;
+  margin: 50px 75px;
 }
 
 table {
+  font: 18px 'Anonymous Pro', 'Courier New', monospace;
   border-collapse: collapse;
-  width: 350px;
-  font-size: 20px;
-  margin-top: 30px;
+  margin: 40px 0;
 }
 
-.predictions {
-  width: 100%;
-}
+th {
+  text-transform: uppercase;
+  text-align: left;
+ }
 
-.predictions th {
+td {
+  border-bottom: 1px dotted #ccc;
+  padding: 5px 0;
   text-align: left;
 }
 
-.predictions .team {
-  width: 25%;
+.team { width: 25ch; }
+.haveplayed .team { width: 18ch; }
+.numeric { text-align: right; }
+
+.score { width: 6ch; }
+.mov, .prd, .err { width: 8ch; }
+
+.rating { width: 10ch; }
+
+/** index **/
+.wrapper {
+  display: flex;
 }
 
-.predictions .score {
-  width: 5%;
+.wrapper .ratings {
+  margin-right: 75px;
 }
 
-.predictions .numeric {
-  text-align: right;
-  width: 10%;
+.wrapper .predictions {
 }
 
-tr:last-child td {
-  border-bottom: 0;
+/** Add a rank to the ratings */
+body {
+  counter-reset: rank;
 }
 
-td {
-  border-bottom: 1px solid #bbb;
-  padding: 5px 0;
-}
-
-.rating {
-  text-align: right;
-  font-size: 18px;
-}
-
-.rank::before {
+td.rank::before {
   counter-increment: rank;
   content: counter(rank);
 }
 
+td.rank {
+  padding: 0 10px;
+  font-size: 13px;
+  width: 5ch;
+}
+
 .rank {
   text-align: center;
-  font-size: 13px;
-  padding: 0 5px;
 }

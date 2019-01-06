@@ -21,14 +21,7 @@ def solve(M, N):
     return rv[0]
 
 def update_ratings(M, N, games):
-    # quick bail if the day's slate hasn't happened yet
-    future_games = all([g.score1 == g.score2 == 0 for g in games])
-    if future_games:
-        return M, N
-
     for game in games:
-        neutral = (game.homefield1 == game.homefield2 == 0)
-
         if game.homefield1 in (0, 1): # 0 = neutral, so just pick this one
             home_idx = game.team1 - 1
             home_pts = game.score1
@@ -49,6 +42,7 @@ def update_ratings(M, N, games):
         N[home_idx] += (home_pts - away_pts)
         N[away_idx] += (away_pts - home_pts)
 
+        neutral = (game.homefield1 == game.homefield2 == 0)
         if not neutral:
             M[home_idx, -1] += 1
             M[-1, home_idx] += 1
@@ -79,7 +73,10 @@ def build_predictions(lookup, ratings, hca, games):
         else:
             hmov_pred = ratings[home_idx] - ratings[away_idx]
 
-        error = hmov_pred - (home_pts - away_pts)
+        if home_pts + away_pts > 0:
+            error = hmov_pred - (home_pts - away_pts)
+        else:
+            error = 0
 
         yield (lookup[away_idx], away_pts, lookup[home_idx], home_pts, hmov_pred, error)
 
@@ -96,8 +93,10 @@ def build_team_ratings(teams, ratings):
 
 def main(results_fname, teams_fname, team_count):
     conn = sqlite3.connect('ratings.db')
+
     teams = build_teams(teams_fname)
     assert len(teams) == team_count, 'incorrect number of teams'
+
     game_results = parse_results(results_fname)
     daily_games = groupby(game_results, key=attrgetter('date'))
     M, N = build_matrices(team_count)
@@ -107,25 +106,27 @@ def main(results_fname, teams_fname, team_count):
     hca = None
 
     # map each team idx to a team name
-    teams_lookup = dict(zip(xrange(team_count), teams))
+    teams_lookup = {idx: name for (idx, name) in zip(xrange(team_count), teams)}
 
     for date, games in daily_games:
         games = list(games)
 
-        if ratings is not None and game_count >= 1200:
+        # wait until ratings and HCA stablize
+        if game_count >= 1200:
             preds = build_predictions(teams_lookup, ratings, hca, games)
             values = [(results_fname, date, away, ascore, home, hscore, hmov_pred, error) for (away, ascore, home, hscore, hmov_pred, error) in preds]
             conn.executemany('insert into predictions (results, date, away, ascore, home, hscore, hmov_pred, error) values (?, ?, ?, ?, ?, ?, ?, ?)', values)
 
-        M, N = update_ratings(M, N, games)
-        ratings = solve(M, N)
-        team_ratings = build_team_ratings(teams, ratings)
-        values = [(results_fname, date, team.name, team.rating) for team in team_ratings]
-        conn.executemany('insert into ratings (results, date, team, rating) values (?, ?, ?, ?)', values)
+        if sum([g.score1 + g.score2 for g in games]) > 0:
+            M, N = update_ratings(M, N, games)
+            ratings = solve(M, N)
+            team_ratings = build_team_ratings(teams, ratings)
+            values = [(results_fname, date, team.name, team.rating) for team in team_ratings]
+            conn.executemany('insert into ratings (results, date, team, rating) values (?, ?, ?, ?)', values)
 
-        game_count += len(games)
-        hca = ratings[-1]
-        conn.execute('insert into stats (date, game_count, hca) values (?, ?, ?)', (date, game_count, hca))
+            game_count += len(games)
+            hca = ratings[-1]
+            conn.execute('insert into stats (date, game_count, hca) values (?, ?, ?)', (date, game_count, hca))
 
     conn.commit()
     conn.close()

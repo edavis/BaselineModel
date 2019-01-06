@@ -1,16 +1,14 @@
 {{ define "title" }}
-Daily Predictions for {{ .PubDate.Format "Jan 02, 2006" }}
+Baseline Model Predictions for {{ .PubDate.Format "Jan 02, 2006" }}
 {{ end }}
 
 {{ define "header" }}
-<h1>Daily Predictions for {{ .PubDate.Format "Jan 02, 2006" }}</h1>
+<h1>Baseline Model Predictions for {{ .PubDate.Format "Jan 02, 2006" }}</h1>
 {{ end }}
 
 {{ define "intro" }}
-{{ if .Params.have_played }}
-Today MAE: {{ .Params.today_mae }} | Today MSE: {{ .Params.today_mse }}<br>
-{{ end }}
-Total MAE: {{ .Params.total_mae }} | Total MSE: {{ .Params.total_mse }}
+{{ if .Params.HavePlayed }}<p>Today MAE: {{ .Params.TodayMAE }} | Today MSE: {{ .Params.TodayMSE }}{{ end }}
+<p>Total MAE: {{ .Params.TotalMAE }} | Total MSE: {{ .Params.TotalMSE }}
 {{ end }}
 
 {{ define "main" }}

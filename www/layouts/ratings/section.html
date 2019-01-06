@@ -1,0 +1,12 @@
+{{ define "title" }}Baseline Model Ratings{{ end }}
+
+{{ define "header" }}<h1>Baseline Model Ratings</h1>{{ end }}
+
+{{ define "main" }}
+{{ range first 1 .Pages }}
+<p>Subtract the ratings of two teams to arrive at a predicted margin of victory.
+<p>Add the home-court advantage (below) to the home team's rating if the game is not on a neutral court.
+<p>{{ partial "stats.html" . }}
+{{ .Content }}
+{{ end }}
+{{ end }}

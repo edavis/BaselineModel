@@ -34,17 +34,23 @@ def main(results_fname):
 
         page = open('www/content/ratings/ratings-%s.md' % date, 'w')
         page.write('---\n')
-        page.write('title: Daily Ratings Update\n')
-        page.write('date: %s-%s-%s\n' % (date[:4], date[4:6], date[6:]))
+        page.write('Title: Daily Ratings Update\n')
+        page.write('Date: %s-%s-%s\n' % (date[:4], date[4:6], date[6:]))
         page.write('GameCount: %d\n' % game_count)
         page.write('HCA: %.2f\n' % hca)
         page.write('---\n\n')
         page.write('<table class=ratings>\n')
 
+        page.write('<tr>')
+        page.write('<th class=rank>Rnk</th>')
+        page.write('<th class=team>Team</th>')
+        page.write('<th class=numeric>Rating</th>')
+        page.write('</tr>\n')
+
         sorted_ratings = sorted(ratings, key=itemgetter(2), reverse=True)
         for (date, team_name, team_rating) in sorted_ratings:
             team_name = team_name.replace('_', ' ')
-            page.write('<tr><td class=rank></td><td class=team>%s</td><td class=rating>%.2f</td></tr>\n' % (team_name, team_rating))
+            page.write('<tr><td class=rank></td><td class=team>%s</td><td class="rating numeric">%.2f</td></tr>\n' % (team_name, team_rating))
 
         page.write('</table>\n')
         page.close()
@@ -63,28 +69,42 @@ def main(results_fname):
 
         page = open('www/content/predictions/predictions-%s.md' % date, 'w')
         page.write('---\n')
-        page.write('title: Daily Predictions Update\n')
-        page.write('date: %s-%s-%s\n' % (date[:4], date[4:6], date[6:]))
-        page.write('today_mae: %.2f\n' % calc_mae(today_errors))
-        page.write('today_mse: %.2f\n' % calc_mse(today_errors))
-        page.write('today_rmse: %.2f\n' % calc_rmse(today_errors))
-        page.write('total_mae: %.2f\n' % calc_mae(total_errors))
-        page.write('total_mse: %.2f\n' % calc_mse(total_errors))
-        page.write('total_rmse: %.2f\n' % calc_rmse(total_errors))
-        page.write('have_played: %d\n' % have_played)
+        page.write('Title: Daily Predictions Update\n')
+        page.write('Date: %s-%s-%s\n' % (date[:4], date[4:6], date[6:]))
+        page.write('TotalMAE: %.2f\n' % calc_mae(total_errors))
+        page.write('TotalMSE: %.2f\n' % calc_mse(total_errors))
+        page.write('TotalRMSE: %.2f\n' % calc_rmse(total_errors))
+        if have_played:
+            page.write('TodayMAE: %.2f\n' % calc_mae(today_errors))
+            page.write('TodayMSE: %.2f\n' % calc_mse(today_errors))
+            page.write('TodayRMSE: %.2f\n' % calc_rmse(today_errors))
+            page.write('HavePlayed: %d\n' % have_played)
         page.write('---\n\n')
 
-        page.write('<table class=predictions>')
+        page.write('<table class="predictions %s">' % ('haveplayed' if have_played else ''))
+        page.write('<tr>')
+
         if have_played:
-            page.write('<tr><th colspan=2>Away</th> <th colspan=2>Home</th> <th class=numeric>MOV</th> <th class=numeric>Prediction</th> <th class=numeric>Error</th></tr>\n')
+            page.write('<th class=team>Away</th>')
+            page.write('<th class=score>Pts</th>')
+            page.write('<th class=team>Home</th>')
+            page.write('<th class=score>Pts</th>')
+            page.write('<th class="numeric mov">Mov</th>')
+            page.write('<th class="numeric prd">Pred</th>')
+            page.write('<th class="numeric err">Err</th>')
         else:
-            page.write('<tr><th>Away</th> <th>Home</th> <th class=numeric>Prediction</th></tr>\n')
+            page.write('<th class=team>Away</th>')
+            page.write('<th class=team>Home</th>')
+            page.write('<th class=numeric>Prediction</th>')
+
+        page.write('</tr>\n')
+
         for row in rows:
             away = row.away.replace('_', ' ')
             home = row.home.replace('_', ' ')
+            page.write('<tr>')
 
             if have_played:
-                page.write('<tr>')
                 page.write('<td class=team>%s</td>' % away)
                 page.write('<td class=score>%d</td>' % row.ascore)
                 page.write('<td class=team>%s</td>' % home)
@@ -92,15 +112,14 @@ def main(results_fname):
                 page.write('<td class=numeric>%d</td>' % row.hmov_actual)
                 page.write('<td class=numeric>%.2f</td>' % row.hmov_pred)
                 page.write('<td class=numeric>%.2f</td>' % row.error)
-                page.write('</tr>\n')
             else:
-                page.write('<tr>')
                 page.write('<td class=team>%s</td>' % away)
                 page.write('<td class=team>%s</td>' % home)
                 page.write('<td class=numeric>%.2f</td>' % row.hmov_pred)
-                page.write('</tr>\n')
-        page.write('</table>')
 
+            page.write('</tr>\n')
+
+        page.write('</table>')
         page.close()
 
 if __name__ == '__main__':
