@@ -132,6 +132,6 @@ def main(results_fname, teams_fname, team_count):
     conn.close()
 
 if __name__ == '__main__':
-    main('results2017.csv', 'teams2017.csv', 351)
-    main('results2018.csv', 'teams2018.csv', 351)
+    #main('results2017.csv', 'teams2017.csv', 351)
+    #main('results2018.csv', 'teams2018.csv', 351)
     main('results2019.csv', 'teams2019.csv', 353)
