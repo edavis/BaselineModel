@@ -123,6 +123,9 @@ def main(results_fname):
         page.close()
 
 if __name__ == '__main__':
-    #main('results2017.csv')
-    #main('results2018.csv')
-    main('results2019.csv')
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-r', '--results')
+    args = parser.parse_args()
+
+    main(args.results)
