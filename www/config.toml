@@ -1,7 +1,8 @@
-baseURL = "https://baseline-model.s3.amazonaws.com"
+baseURL = "/"
 languageCode = "en-us"
-title = "BaseLine Model"
+title = "Baseline Model"
 uglyURLs = true
+disableKinds = ["taxonomy", "taxonomyTerm"]
 
 [permalinks]
   ratings = "/:year/:month/:day/ratings"
