@@ -1,4 +1,4 @@
-baseURL = "/"
+baseURL = "/baseline-model/"
 languageCode = "en-us"
 title = "Baseline Model"
 uglyURLs = true
