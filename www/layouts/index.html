@@ -16,7 +16,7 @@
 <div class=predictions>
 {{ range first 1 (where (where .Pages "Section" "predictions").Reverse ".Params.haveplayed" nil) }}
 <h2>Predictions for {{ .PubDate.Format "Jan 02, 2006" }}</h2>
-<p>Season-to-date MAE: {{ .Params.TotalMAE }} | Season-to-date MSE: {{ .Params.TotalMSE }}
+<p>Dec 3, 2019-to-date MAE: {{ .Params.TotalMAE }} | Dec 3, 2019-to-date MSE: {{ .Params.TotalMSE }}
 {{ .Content }}
 {{ end }}
 </div>
